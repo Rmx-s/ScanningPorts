@@ -1,0 +1,56 @@
+#!/bin/bash
+#Autor Rmx - ScanningPorts
+#Colours
+  greencolour="\e[0;32m\033[1m"
+  endcolour="\033[0m\e[0m"
+  redcolour="\e[0;31m\033[1m"
+  bluecolour="\e[0;34m\033[1m"
+  yellowcolour="\e[0;33m\033[1m"
+  purplecolour="\e[0;35m\033[1m"
+  turquoisecolour="\e[0;36m\033[1m"
+  graycolour="\e[0;37m\033[1m"
+
+ #Control C
+	 trap ctrl_c INT
+ 	function ctrl_c(){
+   	echo -e "\n${redcolour}[*]${endcolour}${yellowcolour}\tWait a moment please...${endcolour}"
+      	sleep 1
+  	echo -e "${redcolour}[*]${endcolour}${yellowcolour}\tCanceled Process...${endcolour}"
+      	sleep 1
+   	echo -e "${redcolour}[*]${endcolour}${yellowcolour}\tYour process has been successfully canceled${endcolour}"
+      	sleep 1
+   	}
+
+#Main Functions
+	if [ "$(id -u)" == "0" ]; then
+           echo -ne "${redcolour}[*]${endcolour}${graycolour} Ip Address: ${encolour}" && read ip
+           number="$(ping -c 1 $ip | egrep -v "bytes|8|PING|rtt" | grep -n 1 |awk '/packets/ {print $4}'|bat -p -l python)"
+           ttl="$(ping -c 1 $ip | egrep -v "PING|rtt" | grep -n 1 |awk '/bytes/ {print $6}' |cut -d '=' -f2| bat -p -l python)"
+           echo -e "${redcolour}[*]${endcolour}${graycolour} Scanning operating system... ${endcolour}"
+           sleep 2
+           if [ "$(echo $ttl)" -le "64" ] ; then
+              echo -e "${redcolour}[*]${endcolour}${graycolour} $ip -> (ttl => 64): Linux ${endcolour}"
+                sleep 1
+           else
+                  echo "$ip -> (ttl -> 128): Windows"
+
+           fi
+
+           if [ "$(echo $number)" == "1" ] ; then
+                  echo -e "${redcolour}[*]${endcolour}${graycolour} Scanning victim's ip...  ${endcolour}"
+                  nmap -p- -sS --open  --min-rate 5000 -n  -oN ports $ip > /dev/null 2>&1
+		  echo -e "${redcolour}[*]${endcolour}${graycolour} Port scan completed successfully ${endcolour}\n"
+                  sleep 1
+                  bat ports | head -n -2 |grep -v "Nmap" | grep -v "Host"| grep -v "Not" | grep -v "Some" | bat -p -l python
+                  sleep 1
+                  echo -ne "\n${redcolour}[*]${endcolour}${graycolour} Open ports ${encolour}" && read ports
+                  echo -e "${redcolour}[*]${endcolour}${graycolour} Scanning Ports...${endcolour}"
+                  nmap -p$ports -sC -sV  -oN target $ip > /dev/null 2>&1
+                  echo -e "${redcolour}[*]${endcolour}${graycolour} Scan Completed succesfully ${encolour}\n"
+                  tput cnorm
+             else
+                   echo -e "${redcolour}[*]${endcolour}${graycolour}   The ip you mentioned is out of service ${endcolour}"
+              fi
+      	  else
+          	   echo -e "${redcolour}[*]${endcolour}${redcolour} Request Denied ${endcolour}"
+           fi
