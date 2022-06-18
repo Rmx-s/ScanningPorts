@@ -46,8 +46,11 @@
                   echo -ne "\n${redcolour}[*]${endcolour}${graycolour} Open ports ${encolour}" && read ports
                   echo -e "${redcolour}[*]${endcolour}${graycolour} Scanning Ports...${endcolour}"
                   nmap -p$ports -sC -sV  -oN target $ip > /dev/null 2>&1
-                  echo -e "${redcolour}[*]${endcolour}${graycolour} Scan Completed succesfully ${encolour}\n"
+                  whatweb --log-brief Whatweb http://$ip > /dev/null 2>&1
+		  
+		  echo -e "${redcolour}[*]${endcolour}${graycolour} Scan Completed succesfully ${encolour}\n"
                   tput cnorm
+		  
              else
                    echo -e "${redcolour}[*]${endcolour}${graycolour}   The ip you mentioned is out of service ${endcolour}"
               fi
